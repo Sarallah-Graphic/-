@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ایران پی | ایمیل موقت حرفه‌ای</title>
+    <meta name="description" content="ایران پی - سرویس ایمیل موقت رایگان و حرفه‌ای با تایمر انقضا و صندوق ورودی هوشمند">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📧</text></svg>">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.0.3/dist/font-face.css" rel="stylesheet" type="text/css" />
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'vazir': ['Vazirmatn', 'sans-serif'],
+                    },
+                    colors: {
+                        'brand': {
+                            50: '#e8f4fc',
+                            100: '#b8e0f7',
+                            200: '#88ccf2',
+                            300: '#58b8ed',
+                            400: '#2d9cdb',
+                            500: '#1a7ab8',
+                            600: '#125a8a',
+                            700: '#0a3a5c',
+                            800: '#051d2e',
+                            900: '#020e17',
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'slide-up': 'slideUp 0.4s ease-out',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        glow: {
+                            '0%': { boxShadow: '0 0 5px rgba(45, 156, 219, 0.3)' },
+                            '100%': { boxShadow: '0 0 20px rgba(45, 156, 219, 0.6), 0 0 40px rgba(45, 156, 219, 0.2)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * { font-family: 'Vazirmatn', sans-serif; box-sizing: border-box; }
+        body { 
+            background: linear-gradient(135deg, #0a0e17 0%, #0f1724 50%, #0a1018 100%); 
+            color: #e8edf5; 
+            min-height: 100vh; 
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0f1720; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #2d4b63; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #2d9cdb; }
+
+        /* Glass Card Effect */
+        .glass-card { 
+            background: rgba(20, 28, 40, 0.75); 
+            backdrop-filter: blur(16px); 
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            box-shadow: 0 20px 35px -10px rgba(0,0,0,0.7), 
+                        0 0 0 1px rgba(45, 156, 219, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .glass-card:hover {
+            box-shadow: 0 25px 40px -10px rgba(0,0,0,0.8), 
+                        0 0 0 1px rgba(45, 156, 219, 0.1),
+                        0 0 30px rgba(45, 156, 219, 0.05);
+        }
+
+        /* Inbox Item */
+        .inbox-item { 
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+            border-right: 3px solid transparent; 
+            position: relative;
+            overflow: hidden;
+        }
+        .inbox-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 0;
+            height: 100%;
+            background: rgba(45, 156, 219, 0.1);
+            transition: width 0.3s ease;
+            z-index: 0;
+        }
+        .inbox-item:hover::before { width: 100%; }
+        .inbox-item:hover { 
+            background: rgba(255,255,255,0.04); 
+            border-right-color: #2d9cdb; 
+            transform: translateX(-4px); 
+        }
+        .inbox-item.active { 
+            background: rgba(45, 156, 219, 0.12); 
+            border-right-color: #2d9cdb; 
+            box-shadow: inset 0 0 20px rgba(45, 156, 219, 0.05);
+        }
+        .inbox-item > * { position: relative; z-index: 1; }
+
+        /* Preview Panel */
+        .preview-panel { 
+            background: linear-gradient(180deg, #121a24 0%, #0f1720 100%); 
+            border-left: 1px solid #1f2a36; 
+        }
+
+        /* Toast Notification */
+        .toast { 
+            background: rgba(28, 42, 58, 0.95); 
+            border-right: 4px solid #2d9cdb; 
+            box-shadow: 0 10px 30px -8px rgba(0,0,0,0.8),
+                        0 0 0 1px rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            animation: toastSlide 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes toastSlide {
+            from { transform: translateX(100px) scale(0.9); opacity: 0; }
+            to { transform: translateX(0) scale(1); opacity: 1; }
+        }
+
+        /* Badge */
+        .badge-time { 
+            background: rgba(31, 42, 54, 0.8); 
+            color: #b0c7db; 
+            padding: 0.25rem 0.75rem; 
+            border-radius: 30px; 
+            font-size: 0.7rem;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.2s ease;
+        }
+        .inbox-item:hover .badge-time {
+            background: rgba(45, 156, 219, 0.2);
+            color: #2d9cdb;
+        }
+
+        /* Input Styling */
+        .input-fancy {
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .input-fancy:focus { 
+            box-shadow: 0 0 0 3px rgba(45, 156, 219, 0.25), 0 0 20px rgba(45, 156, 219, 0.1); 
+            border-color: #2d9cdb; 
+            outline: none;
+        }
+
+        /* Primary Button */
+        .btn-primary { 
+            background: #1f3a4f; 
+            color: white; 
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.4s ease, height 0.4s ease;
+        }
+        .btn-primary:hover::after { width: 300px; height: 300px; }
+        .btn-primary:hover { 
+            background: #2a4d66; 
+            transform: scale(0.97); 
+        }
+        .btn-primary:active { transform: scale(0.93); }
+
+        /* Admin Panel */
+        .admin-panel { 
+            background: linear-gradient(180deg, #0f1722 0%, #0c131c 100%); 
+            border-top: 1px solid #1f2d3a; 
+        }
+
+        /* Stat Card */
+        .stat-card {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(45, 156, 219, 0.5), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+        .stat-card:hover::before { transform: translateX(100%); }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
+        }
+
+        /* Generate Button */
+        .btn-generate {
+            background: linear-gradient(135deg, #2d9cdb 0%, #1a7ab8 100%);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .btn-generate::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        .btn-generate:hover::before { left: 100%; }
+        .btn-generate:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px -5px rgba(45, 156, 219, 0.4);
+        }
+        .btn-generate:active { transform: translateY(1px); }
+
+        /* Background particles */
+        .bg-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(45, 156, 219, 0.3);
+            border-radius: 50%;
+            animation: float-particle 15s infinite linear;
+        }
+        @keyframes float-particle {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* Loading shimmer */
+        .shimmer {
+            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0) 100%);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        /* Message detail animation */
+        .message-content {
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        /* New message indicator */
+        .new-msg-indicator {
+            animation: pulse 2s infinite;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .glass-card { border-radius: 1.5rem !important; }
+            .preview-panel { border-left: none; border-top: 1px solid #1f2a36; }
+        }
+
+        /* Tooltip */
+        [data-tooltip] {
+            position: relative;
+        }
+        [data-tooltip]::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-5px);
+            background: rgba(15, 23, 34, 0.95);
+            color: #e8edf5;
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(255,255,255,0.1);
+            z-index: 100;
+        }
+        [data-tooltip]:hover::after {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-10px);
+        }
+
+        /* Timer progress bar */
+        .timer-progress {
+            height: 3px;
+            background: rgba(45, 156, 219, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .timer-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #2d9cdb, #58b8ed);
+            border-radius: 3px;
+            transition: width 1s linear;
+        }
+
+        /* Email input glow */
+        .email-input-wrapper:focus-within {
+            box-shadow: 0 0 0 2px rgba(45, 156, 219, 0.15);
+            border-radius: 1rem;
+        }
+
+        /* Copy button feedback */
+        .copy-feedback {
+            animation: copyPop 0.3s ease;
+        }
+        @keyframes copyPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* Unread badge */
+        .unread-badge {
+            animation: unreadPulse 2s infinite;
+        }
+        @keyframes unreadPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(45, 156, 219, 0.4); }
+            50% { box-shadow: 0 0 0 6px rgba(45, 156, 219, 0); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Background Particles -->
+<div class="bg-particles" id="particles"></div>
+
+<div id="app" class="max-w-7xl mx-auto px-3 py-4 md:px-5 relative z-10">
+
+    <!-- Header -->
+    <header class="flex flex-wrap items-center justify-between gap-3 mb-6 animate-fade-in">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-brand-400/20 flex items-center justify-center animate-float">
+                <i class="fas fa-envelope-open-text text-2xl text-brand-400"></i>
+            </div>
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight text-white/90">ایران‌پی</h1>
+                <span class="text-sm font-normal text-gray-400">Temp Mail Professional</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-3 text-sm">
+            <div class="bg-[#1a2633] px-4 py-2 rounded-full text-gray-300 border border-white/5 flex items-center gap-2">
+                <i class="far fa-clock text-brand-400"></i>
+                <span id="timerDisplay" class="font-mono font-semibold">30:00</span>
+                <div class="timer-progress w-16 hidden sm:block">
+                    <div id="timerProgressBar" class="timer-progress-bar" style="width: 100%"></div>
+                </div>
+            </div>
+            <button id="newEmailBtn" class="btn-primary px-4 py-2.5 rounded-full text-sm font-medium flex items-center gap-2" data-tooltip="ایمیل جدید بساز">
+                <i class="fas fa-plus-circle"></i> <span class="hidden sm:inline">ایمیل جدید</span>
+            </button>
+            <button id="refreshBtn" class="bg-[#1a2633] hover:bg-[#263545] text-gray-300 px-3 py-2.5 rounded-full transition-all duration-200 hover:rotate-180" data-tooltip="بروزرسانی صندوق">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Card -->
+    <div class="glass-card rounded-3xl overflow-hidden border border-white/5 animate-slide-up">
+        <!-- Email Generation Row -->
+        <div class="p-4 md:p-6 border-b border-white/5 flex flex-wrap items-center gap-3 bg-black/20">
+            <div class="flex-1 min-w-[200px] flex items-center bg-[#0e1722] rounded-2xl px-4 py-2.5 border border-white/5 email-input-wrapper transition-all duration-300">
+                <i class="fas fa-at text-gray-500 text-lg"></i>
+                <input id="prefixInput" type="text" value="random123" class="bg-transparent border-none outline-none text-white w-full px-3 py-1 text-lg font-mono input-fancy" placeholder="نام کاربری">
+                <span class="text-gray-400 font-mono text-sm whitespace-nowrap">@gmail.com</span>
+            </div>
+            <button id="generateBtn" class="btn-generate text-black font-bold px-6 py-2.5 rounded-2xl transition flex items-center gap-2 shadow-lg shadow-brand-400/20">
+                <i class="fas fa-wand-magic-sparkles"></i> <span class="hidden sm:inline">ساخت ایمیل</span>
+            </button>
+            <button id="copyBtn" class="bg-[#1f2a36] hover:bg-[#2d3d4f] text-white px-5 py-2.5 rounded-2xl transition-all duration-200 flex items-center gap-2 border border-white/5 hover:border-brand-400/30" data-tooltip="کپی ایمیل">
+                <i class="far fa-copy"></i> <span class="hidden sm:inline">کپی</span>
+            </button>
+        </div>
+
+        <!-- Two Column Layout -->
+        <div class="flex flex-col md:flex-row h-[600px] md:h-[650px]">
+            <!-- Inbox Left -->
+            <div class="w-full md:w-[45%] lg:w-[40%] flex flex-col border-b md:border-b-0 md:border-l border-white/5 p-3 overflow-hidden">
+                <div class="flex justify-between items-center mb-3 px-1">
+                    <span class="text-sm text-gray-400 flex items-center gap-2">
+                        <i class="far fa-inbox"></i> صندوق ورودی
+                    </span>
+                    <span class="text-xs bg-[#1a2633] px-3 py-1.5 rounded-full text-gray-300 border border-white/5 flex items-center gap-1">
+                        <span id="emailCount">0</span> پیام
+                    </span>
+                </div>
+                <div id="inboxList" class="flex-1 space-y-2 overflow-y-auto px-1 pb-2">
+                    <!-- Dynamic injected -->
+                </div>
+                <div id="emptyInbox" class="flex flex-col items-center justify-center h-full text-gray-500 opacity-60">
+                    <i class="fas fa-envelope-open-text text-5xl mb-3 animate-pulse-slow"></i>
+                    <span class="text-sm">هنوز پیامی دریافت نشده</span>
+                    <span class="text-xs mt-1 text-gray-600">پیام‌ها به صورت خودکار دریافت می‌شوند</span>
+                </div>
+            </div>
+
+            <!-- Preview Right -->
+            <div class="w-full md:w-[55%] lg:w-[60%] preview-panel flex flex-col p-4 md:p-6 bg-[#101a24]">
+                <div class="flex items-center justify-between border-b border-white/5 pb-3 mb-4">
+                    <span class="text-gray-300 text-sm flex items-center gap-2">
+                        <i class="far fa-eye text-brand-400"></i> پیش‌نمایش پیام
+                    </span>
+                    <span class="text-xs text-gray-500 font-mono" id="msgIndex">—</span>
+                </div>
+                <div id="messageDetail" class="flex-1 overflow-y-auto text-gray-200 leading-relaxed">
+                    <div class="flex flex-col items-center justify-center h-full text-gray-500 opacity-50">
+                        <div class="w-20 h-20 rounded-full bg-brand-400/10 flex items-center justify-center mb-4">
+                            <i class="far fa-envelope text-3xl text-brand-400/50"></i>
+                        </div>
+                        <span class="text-lg">روی یک ایمیل کلیک کنید</span>
+                        <span class="text-xs mt-2 text-gray-600">برای مشاهده محتوای کامل پیام</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div class="admin-panel mt-6 rounded-2xl p-4 md:p-6 border border-white/5 animate-slide-up" style="animation-delay: 0.1s">
+        <div class="flex items-center gap-3 text-sm text-gray-300 border-b border-white/5 pb-3 mb-4">
+            <div class="w-8 h-8 rounded-lg bg-brand-400/20 flex items-center justify-center">
+                <i class="fas fa-shield-alt text-brand-400 text-sm"></i>
+            </div>
+            <span class="font-semibold">پنل مدیریت</span>
+            <span class="text-xs text-gray-500">| کنترل سیستم و آمار</span>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+            <div class="stat-card bg-[#0e1722] p-4 rounded-xl border border-white/5 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-brand-400/15 flex items-center justify-center">
+                    <i class="fas fa-users text-brand-400 text-lg"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-gray-400">ایمیل‌های ساخته‌شده</div>
+                    <div class="font-bold text-xl text-white" id="adminEmailCount">1</div>
+                </div>
+            </div>
+            <div class="stat-card bg-[#0e1722] p-4 rounded-xl border border-white/5 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-yellow-400/15 flex items-center justify-center">
+                    <i class="fas fa-envelope text-yellow-400 text-lg"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-gray-400">پیام‌های دریافتی</div>
+                    <div class="font-bold text-xl text-white" id="adminMsgCount">0</div>
+                </div>
+            </div>
+            <div class="stat-card bg-[#0e1722] p-4 rounded-xl border border-white/5 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-orange-400/15 flex items-center justify-center">
+                    <i class="fas fa-hourglass-half text-orange-400 text-lg"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-gray-400">انقضا (دقیقه)</div>
+                    <div class="font-bold text-xl text-white" id="adminTimer">30</div>
+                </div>
+            </div>
+            <div class="stat-card bg-[#0e1722] p-4 rounded-xl border border-white/5 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-green-400/15 flex items-center justify-center">
+                    <i class="fas fa-rotate text-green-400 text-lg"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-gray-400">بروزرسانی خودکار</div>
+                    <div class="font-bold text-xl text-green-400" id="adminAutoStatus">فعال</div>
+                </div>
+            </div>
+        </div>
+        <div class="flex flex-wrap gap-3 items-center">
+            <button id="adminResetBtn" class="bg-[#1f2a36] hover:bg-[#2d3d4f] text-white px-4 py-2 rounded-xl text-sm transition-all duration-200 border border-white/5 hover:border-red-400/30 hover:text-red-400">
+                <i class="fas fa-undo-alt me-1"></i> بازنشانی همه
+            </button>
+            <button id="adminSimulateMsg" class="bg-[#2d5f7a] hover:bg-[#347a9c] text-white px-4 py-2 rounded-xl text-sm transition-all duration-200 border border-white/5">
+                <i class="fas fa-bolt me-1"></i> شبیه‌سازی پیام
+            </button>
+            <div class="flex items-center gap-2 ml-auto">
+                <span class="w-2 h-2 rounded-full bg-green-400 new-msg-indicator"></span>
+                <span class="text-xs text-gray-500">دریافت خودکار هر ۱۵-۲۵ ثانیه</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-8 text-center text-gray-600 text-xs pb-4">
+        <p>ایران پی © 2024 | سرویس ایمیل موقت حرفه‌ای</p>
+    </footer>
+</div>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="fixed bottom-6 left-6 z-50 space-y-2 max-w-xs w-full"></div>
+
+<script>
+(function(){
+    // ---- State ----
+    let currentEmail = { prefix: 'random123', full: 'random123@gmail.com' };
+    let inboxMessages = [];
+    let selectedMessageId = null;
+    let timerSeconds = 1800; // 30 min
+    let timerInterval = null;
+    let autoSimInterval = null;
+    let messageIdCounter = 0;
+    let totalEmailsCreated = 1;
+    let isAutoRefreshActive = true;
+
+    // DOM elements
+    const prefixInput = document.getElementById('prefixInput');
+    const generateBtn = document.getElementById('generateBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const newEmailBtn = document.getElementById('newEmailBtn');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const inboxList = document.getElementById('inboxList');
+    const emptyInbox = document.getElementById('emptyInbox');
+    const messageDetail = document.getElementById('messageDetail');
+    const timerDisplay = document.getElementById('timerDisplay');
+    const timerProgressBar = document.getElementById('timerProgressBar');
+    const emailCount = document.getElementById('emailCount');
+    const adminEmailCount = document.getElementById('adminEmailCount');
+    const adminMsgCount = document.getElementById('adminMsgCount');
+    const adminTimer = document.getElementById('adminTimer');
+    const adminAutoStatus = document.getElementById('adminAutoStatus');
+    const adminResetBtn = document.getElementById('adminResetBtn');
+    const adminSimulateMsg = document.getElementById('adminSimulateMsg');
+    const toastContainer = document.getElementById('toastContainer');
+    const msgIndex = document.getElementById('msgIndex');
+    const particlesContainer = document.getElementById('particles');
+
+    // ---- Particle System ----
+    function createParticles() {
+        for (let i = 0; i < 20; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 15 + 's';
+            particle.style.animationDuration = (10 + Math.random() * 20) + 's';
+            particle.style.width = (2 + Math.random() * 4) + 'px';
+            particle.style.height = particle.style.width;
+            particle.style.opacity = 0.2 + Math.random() * 0.5;
+            particlesContainer.appendChild(particle);
+        }
+    }
+
+    // ---- Helpers ----
+    function formatTime(sec) {
+        const m = Math.floor(sec / 60);
+        const s = sec % 60;
+        return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function generateRandomPrefix() {
+        const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        let result = '';
+        for (let i = 0; i < 10; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
+        return result;
+    }
+
+    function makeEmail(prefix) {
+        if (!prefix) prefix = generateRandomPrefix();
+        return { prefix, full: prefix + '@gmail.com' };
+    }
+
+    function updateEmailDisplay() {
+        prefixInput.value = currentEmail.prefix;
+    }
+
+    // ---- Generate New Email ----
+    function generateNewEmail(prefix = null) {
+        if (prefix) {
+            currentEmail = makeEmail(prefix);
+        } else {
+            const newPrefix = generateRandomPrefix();
+            currentEmail = makeEmail(newPrefix);
+        }
+        totalEmailsCreated++;
+        updateEmailDisplay();
+        inboxMessages = [];
+        selectedMessageId = null;
+        renderInbox();
+        renderMessageDetail(null);
+        resetTimer();
+        updateAdminStats();
+        showToast('✨ ایمیل جدید ساخته شد: ' + currentEmail.full, 'success');
+
+        // Visual feedback
+        prefixInput.parentElement.classList.add('animate-glow');
+        setTimeout(() => prefixInput.parentElement.classList.remove('animate-glow'), 2000);
+    }
+
+    // ---- Timer ----
+    function resetTimer() {
+        if (timerInterval) clearInterval(timerInterval);
+        timerSeconds = 1800;
+        timerDisplay.textContent = formatTime(timerSeconds);
+        adminTimer.textContent = '30';
+        updateTimerProgress();
+        timerInterval = setInterval(() => {
+            timerSeconds--;
+            timerDisplay.textContent = formatTime(timerSeconds);
+            adminTimer.textContent = Math.floor(timerSeconds/60);
+            updateTimerProgress();
+            if (timerSeconds <= 0) {
+                clearInterval(timerInterval);
+                timerDisplay.textContent = 'منقضی';
+                timerDisplay.classList.add('text-red-400');
+                showToast('⏰ ایمیل منقضی شد! دکمه "ایمیل جدید" را بزنید.', 'warning');
+            }
+        }, 1000);
+    }
+
+    function updateTimerProgress() {
+        const percentage = (timerSeconds / 1800) * 100;
+        timerProgressBar.style.width = percentage + '%';
+        if (percentage < 20) {
+            timerProgressBar.style.background = 'linear-gradient(90deg, #ef4444, #f87171)';
+        } else if (percentage < 50) {
+            timerProgressBar.style.background = 'linear-gradient(90deg, #f59e0b, #fbbf24)';
+        } else {
+            timerProgressBar.style.background = 'linear-gradient(90deg, #2d9cdb, #58b8ed)';
+        }
+    }
+
+    // ---- Simulate Incoming Message ----
+    function simulateMessage() {
+        const senders = [
+            { email: 'noreply@linkedin.com', icon: 'fab fa-linkedin', color: '#0A66C2' },
+            { email: 'info@github.com', icon: 'fab fa-github', color: '#6e5494' },
+            { email: 'news@medium.com', icon: 'fab fa-medium', color: '#00ab6c' },
+            { email: 'alert@google.com', icon: 'fab fa-google', color: '#4285F4' },
+            { email: 'team@figma.com', icon: 'fab fa-figma', color: '#F24E1E' },
+            { email: 'support@microsoft.com', icon: 'fab fa-microsoft', color: '#00A4EF' },
+            { email: 'jobs@remote.com', icon: 'fas fa-briefcase', color: '#f59e0b' },
+            { email: 'hello@openai.com', icon: 'fas fa-robot', color: '#10a37f' },
+            { email: 'verify@twitter.com', icon: 'fab fa-twitter', color: '#1DA1F2' },
+            { email: 'security@apple.com', icon: 'fab fa-apple', color: '#A2AAAD' }
+        ];
+        const subjects = [
+            'تایید حساب کاربری', 'یادآوری جلسه هفتگی', 'پیشنهاد همکاری جدید', 
+            'به‌روزرسانی امنیتی', 'پیام جدید دریافتی', 'فاکتور پرداخت', 
+            'اخبار هفته تکنولوژی', 'دعوتنامه رویداد', 'کد تایید ورود', 'به‌روزرسانی سیاست‌ها'
+        ];
+        const bodies = [
+            'سلام، این یک پیام تست از سمت ایران‌پی است. با تشکر از استفاده شما از سرویس ما.',
+            'لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و با استفاده از طراحان گرافیک است.',
+            'شما یک پیام جدید دریافت کرده‌اید. برای مشاهده جزئیات کامل روی پیام کلیک کنید.',
+            'کد تایید شما: ۸۴۷۲۹۱. این کد تا ۵ دقیقه معتبر است. لطفاً آن را با کسی به اشتراک نگذارید.',
+            'حساب کاربری شما با موفقیت ایجاد شد. برای فعال‌سازی کامل روی لینک زیر کلیک کنید.',
+            'فاکتور جدید شما صادر شد. مبلغ قابل پرداخت: ۲,۵۰۰,۰۰۰ تومان.',
+            'به‌روزرسانی جدید اپلیکیشن منتشر شد. نسخه ۲.۵.۰ با ویژگی‌های جدید در دسترس است.',
+            'یادآوری: جلسه شما فردا ساعت ۱۴:۰۰ برگزار می‌شود. لطفاً حضور به‌موقع داشته باشید.'
+        ];
+
+        const senderData = senders[Math.floor(Math.random() * senders.length)];
+        const subject = subjects[Math.floor(Math.random() * subjects.length)];
+        const body = bodies[Math.floor(Math.random() * bodies.length)] + '
+
+(زمان: ' + new Date().toLocaleTimeString('fa-IR') + ')';
+
+        const newMsg = {
+            id: ++messageIdCounter,
+            from: senderData.email,
+            fromIcon: senderData.icon,
+            fromColor: senderData.color,
+            subject: subject,
+            preview: body.substring(0, 60) + '...',
+            body: body,
+            time: new Date().toLocaleTimeString('fa-IR'),
+            timestamp: Date.now(),
+            read: false
+        };
+
+        inboxMessages.push(newMsg);
+        renderInbox();
+        updateAdminStats();
+        showToast('📩 پیام جدید از ' + senderData.email.split('@')[1], 'info');
+
+        if (!selectedMessageId) {
+            selectedMessageId = newMsg.id;
+            renderMessageDetail(newMsg);
+        }
+
+        // Play subtle notification sound (optional visual feedback)
+        document.title = '🔴 (1) ایران پی | ایمیل موقت';
+        setTimeout(() => { document.title = 'ایران پی | ایمیل موقت حرفه‌ای'; }, 2000);
+    }
+
+    // ---- Render Inbox ----
+    function renderInbox() {
+        inboxList.innerHTML = '';
+        if (inboxMessages.length === 0) {
+            emptyInbox.style.display = 'flex';
+            emailCount.textContent = '0';
+            return;
+        }
+        emptyInbox.style.display = 'none';
+        emailCount.textContent = inboxMessages.length;
+
+        const sorted = [...inboxMessages].sort((a, b) => b.timestamp - a.timestamp);
+        sorted.forEach((msg, index) => {
+            const div = document.createElement('div');
+            div.className = `inbox-item p-3 rounded-xl cursor-pointer flex items-center justify-between ${selectedMessageId === msg.id ? 'active' : ''}`;
+            div.dataset.id = msg.id;
+
+            const isUnread = !msg.read && msg.id !== selectedMessageId;
+
+            div.innerHTML = `
+                <div class="flex items-center gap-3 flex-1 min-w-0">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm shrink-0" 
+                         style="background: ${msg.fromColor}20; color: ${msg.fromColor}">
+                        <i class="${msg.fromIcon}"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="font-semibold text-sm text-gray-200 truncate flex items-center gap-2">
+                            ${msg.from}
+                            ${isUnread ? '<span class="w-2 h-2 rounded-full bg-brand-400 unread-badge"></span>' : ''}
+                        </div>
+                        <div class="text-xs text-gray-400 truncate">${msg.subject}</div>
+                    </div>
+                </div>
+                <div class="flex flex-col items-end gap-1 ms-2 shrink-0">
+                    <span class="badge-time">${msg.time}</span>
+                    ${msg.read ? '<span class="text-[10px] text-gray-600"><i class="far fa-check-double"></i></span>' : ''}
+                </div>
+            `;
+            div.addEventListener('click', () => {
+                selectedMessageId = msg.id;
+                msg.read = true;
+                renderInbox();
+                renderMessageDetail(msg);
+                msgIndex.textContent = 'پیام ' + (inboxMessages.indexOf(msg) + 1) + ' از ' + inboxMessages.length;
+            });
+            inboxList.appendChild(div);
+        });
+    }
+
+    // ---- Render Message Detail ----
+    function renderMessageDetail(msg) {
+        const container = messageDetail;
+        if (!msg) {
+            container.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-full text-gray-500 opacity-50">
+                    <div class="w-20 h-20 rounded-full bg-brand-400/10 flex items-center justify-center mb-4">
+                        <i class="far fa-envelope text-3xl text-brand-400/50"></i>
+                    </div>
+                    <span class="text-lg">روی یک ایمیل کلیک کنید</span>
+                    <span class="text-xs mt-2 text-gray-600">برای مشاهده محتوای کامل پیام</span>
+                </div>
+            `;
+            msgIndex.textContent = '—';
+            return;
+        }
+        container.innerHTML = `
+            <div class="message-content space-y-4">
+                <div class="flex items-center gap-3 border-b border-white/5 pb-4">
+                    <div class="w-12 h-12 rounded-full flex items-center justify-center text-lg" 
+                         style="background: ${msg.fromColor}20; color: ${msg.fromColor}">
+                        <i class="${msg.fromIcon}"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-semibold text-white">${msg.from}</div>
+                        <div class="text-xs text-gray-400">${msg.time}</div>
+                    </div>
+                    <button onclick="copyMessageContent()" class="text-gray-500 hover:text-brand-400 transition p-2 rounded-lg hover:bg-white/5" data-tooltip="کپی محتوا">
+                        <i class="far fa-copy"></i>
+                    </button>
+                </div>
+                <div class="text-xl font-medium text-white">${msg.subject}</div>
+                <div class="text-gray-300 bg-[#0b141e] p-5 rounded-xl whitespace-pre-wrap leading-relaxed border border-white/5">${msg.body}</div>
+                <div class="flex items-center justify-between text-xs text-gray-500 mt-4 pt-3 border-t border-white/5">
+                    <span class="flex items-center gap-1"><i class="far fa-clock"></i> دریافت شده: ${msg.time}</span>
+                    <span class="flex items-center gap-1"><i class="fas fa-shield-alt text-brand-400"></i> امن و رمزنگاری شده</span>
+                </div>
+            </div>
+        `;
+    }
+
+    // ---- Copy Message Content ----
+    window.copyMessageContent = function() {
+        const msg = inboxMessages.find(m => m.id === selectedMessageId);
+        if (msg) {
+            navigator.clipboard.writeText(msg.body).then(() => {
+                showToast('📋 محتوای پیام کپی شد', 'success');
+            });
+        }
+    };
+
+    // ---- Update Admin Stats ----
+    function updateAdminStats() {
+        adminEmailCount.textContent = totalEmailsCreated;
+        adminMsgCount.textContent = inboxMessages.length;
+    }
+
+    // ---- Toast Notification ----
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        const icons = {
+            success: 'fa-check-circle',
+            warning: 'fa-triangle-exclamation',
+            info: 'fa-info-circle',
+            error: 'fa-circle-xmark'
+        };
+        const colors = {
+            success: '#2d9cdb',
+            warning: '#f5b342',
+            info: '#2d9cdb',
+            error: '#ef4444'
+        };
+        const icon = icons[type] || icons.info;
+        const color = colors[type] || colors.info;
+
+        toast.className = `toast p-4 rounded-2xl text-white mb-2 flex items-center gap-3`;
+        toast.style.borderRightColor = color;
+        toast.innerHTML = `
+            <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style="background: ${color}20">
+                <i class="fas ${icon}" style="color:${color}"></i>
+            </div>
+            <span class="text-sm">${message}</span>
+        `;
+        toastContainer.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(40px) scale(0.95)';
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
+    }
+
+    // ---- Refresh Inbox ----
+    function refreshInbox() {
+        const icon = refreshBtn.querySelector('i');
+        icon.classList.add('fa-spin');
+        setTimeout(() => icon.classList.remove('fa-spin'), 1000);
+
+        renderInbox();
+        if (selectedMessageId) {
+            const msg = inboxMessages.find(m => m.id === selectedMessageId);
+            if (msg) renderMessageDetail(msg);
+            else { selectedMessageId = null; renderMessageDetail(null); }
+        }
+        showToast('🔄 صندوق ورودی بروزرسانی شد', 'info');
+    }
+
+    // ---- Copy Email ----
+    function copyEmail() {
+        navigator.clipboard.writeText(currentEmail.full).then(() => {
+            copyBtn.classList.add('copy-feedback');
+            setTimeout(() => copyBtn.classList.remove('copy-feedback'), 300);
+            showToast('📋 ایمیل کپی شد: ' + currentEmail.full, 'success');
+        }).catch(() => {
+            const ta = document.createElement('textarea');
+            ta.value = currentEmail.full;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            ta.remove();
+            showToast('📋 ایمیل کپی شد', 'success');
+        });
+    }
+
+    // ---- Reset All ----
+    function resetAll() {
+        if (confirm('⚠️ بازنشانی همه: پاک‌سازی پیام‌ها و تایمر؟')) {
+            inboxMessages = [];
+            selectedMessageId = null;
+            renderInbox();
+            renderMessageDetail(null);
+            resetTimer();
+            updateAdminStats();
+            showToast('🔄 سیستم بازنشانی شد', 'info');
+        }
+    }
+
+    // ---- Toggle Auto Refresh ----
+    function toggleAutoRefresh() {
+        isAutoRefreshActive = !isAutoRefreshActive;
+        adminAutoStatus.textContent = isAutoRefreshActive ? 'فعال' : 'غیرفعال';
+        adminAutoStatus.className = isAutoRefreshActive ? 'font-bold text-xl text-green-400' : 'font-bold text-xl text-red-400';
+        showToast(isAutoRefreshActive ? '✅ بروزرسانی خودکار فعال شد' : '⏸️ بروزرسانی خودکار غیرفعال شد', 'info');
+    }
+
+    // ---- Initialization ----
+    function init() {
+        createParticles();
+
+        const initPrefix = generateRandomPrefix();
+        currentEmail = makeEmail(initPrefix);
+        prefixInput.value = currentEmail.prefix;
+        resetTimer();
+        updateAdminStats();
+        renderInbox();
+        renderMessageDetail(null);
+
+        // Auto simulation
+        autoSimInterval = setInterval(() => {
+            if (isAutoRefreshActive) {
+                simulateMessage();
+            }
+        }, 20000);
+
+        // Events
+        generateBtn.addEventListener('click', () => {
+            let newPrefix = prefixInput.value.trim();
+            if (!newPrefix) newPrefix = generateRandomPrefix();
+            generateNewEmail(newPrefix);
+        });
+
+        newEmailBtn.addEventListener('click', () => generateNewEmail());
+        copyBtn.addEventListener('click', copyEmail);
+        refreshBtn.addEventListener('click', refreshInbox);
+        adminResetBtn.addEventListener('click', resetAll);
+        adminSimulateMsg.addEventListener('click', simulateMessage);
+
+        prefixInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') generateBtn.click();
+        });
+
+        // Double click on auto status to toggle
+        adminAutoStatus.parentElement.parentElement.addEventListener('dblclick', toggleAutoRefresh);
+        adminAutoStatus.parentElement.parentElement.style.cursor = 'pointer';
+        adminAutoStatus.parentElement.parentElement.title = 'دوبار کلیک کنید برای تغییر وضعیت';
+
+        // Initial simulations
+        setTimeout(() => {
+            simulateMessage();
+            setTimeout(() => simulateMessage(), 3000);
+        }, 2000);
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'c' && document.activeElement === prefixInput) {
+                e.preventDefault();
+                copyEmail();
+            }
+            if (e.ctrlKey && e.key === 'n') {
+                e.preventDefault();
+                generateNewEmail();
+            }
+            if (e.ctrlKey && e.key === 'r') {
+                e.preventDefault();
+                refreshInbox();
+            }
+        });
+    }
+
+    init();
+})();
+</script>
+</body>
+</html>
